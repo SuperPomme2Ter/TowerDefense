@@ -6,73 +6,70 @@ public class S_ModuleInventory : MonoBehaviour
 {
     [SerializeField] private S_RessourceManager resourceManager;
     
-    private TextMeshProUGUI atkSpeedModuleQuantityDisplay;
-    private TextMeshProUGUI atkModuleQuantityDisplay;
-
-    Dictionary<Stats,List<S_ModuleBase>> AllModules = new Dictionary<Stats,List<S_ModuleBase>>();
+    [SerializeField] TextMeshProUGUI totalAtkSpeedModuleQuantityDisplay;
+    [SerializeField] private TextMeshProUGUI totalAtkModuleQuantityDisplay;
+    [SerializeField] private List<S_ModuleSlot> atkSpeedModulesSlot = new List<S_ModuleSlot>();
+    [SerializeField] private List<S_ModuleSlot> atkModulesSlot = new List<S_ModuleSlot>();
+    Dictionary<Stats,List<S_ModuleSlot>> allSlots = new Dictionary<Stats, List<S_ModuleSlot>>();
+    Dictionary<Stats,int> modulesQuantity = new Dictionary<Stats,int>();
     
-    public S_ModuleBase selectedModule;
-    [SerializeField] private bool aaah=false;
-    
-    
-    
-
 
     private void Start()
     {
-        AllModules.Add(Stats.atkSpeed,new List<S_ModuleBase>());
-        AllModules.Add(Stats.DamageMax,new List<S_ModuleBase>());
-        atkSpeedModuleQuantityDisplay=transform.GetChild(0).GetChild(1).gameObject.GetComponent<TextMeshProUGUI>();
-        atkModuleQuantityDisplay=transform.GetChild(1).GetChild(1).gameObject.GetComponent<TextMeshProUGUI>();
+        gameObject.SetActive(false);
+        allSlots.Add(Stats.atkSpeed,atkSpeedModulesSlot);
+        allSlots.Add(Stats.DamageMax,atkModulesSlot);
         
+        modulesQuantity.Add(Stats.atkSpeed,0);
+        modulesQuantity.Add(Stats.DamageMax,0);
+        
+        gameObject.SetActive(false);
     }
-
     private void UpdateModulesDisplay()
     {
-        atkSpeedModuleQuantityDisplay.text = $"X {AllModules[Stats.atkSpeed].Count}";
-        atkModuleQuantityDisplay.text = $"X {AllModules[Stats.DamageMax].Count}";
+        
+        totalAtkSpeedModuleQuantityDisplay.text = $"X {modulesQuantity[Stats.atkSpeed]}";
+        totalAtkModuleQuantityDisplay.text = $"X {modulesQuantity[Stats.DamageMax]}";
     }
 
     //Fonction provisoire
-    private void AddModule(SO_BasePassiveModifiers module)
+    public bool AddModuleToSlot(Stats statToChange,int percentage,int cost)
     {
-        AllModules[module.statToChange].Add(new S_ModuleBase(module.statToChange, module.percentage));
-        UpdateModulesDisplay();
+        foreach (var slots in allSlots[statToChange])
+        {
+            if (slots.TryAddModuleToStock(statToChange, percentage, cost))
+            {
+                UpdateModulesDisplay();
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+    public bool AddModuleToSlot(S_ModuleBase module)
+    {
+        foreach (var slots in allSlots[module.modifierType])
+        {
+            if (slots.TryAddModuleToStock(module))
+            {
+                UpdateModulesDisplay();
+                return true;
+            }
+        }
+        return false;
     }
     public void TryBuyModule(SO_BasePassiveModifiers module)
     {
         if (resourceManager.TryPayEnoughResources(ResourceType.Base, module.cost))
         {
-            AddModule(module);
+            if(AddModuleToSlot(module.statToChange,module.percentage,module.cost))
+            {
+                resourceManager.PayResources(ResourceType.Base, module.cost);
+                return;
+            }
         }
+        return;
     }
-
-    public void ChooseModule(bool test)
-    {
-        if (selectedModule != null)
-        {
-            selectedModule = null;
-            aaah=false;
-            Debug.Log("zqefqe");
-            return;
-            
-        }
-        
-        Debug.Log("bbbbbbbbbbbbbbbb");
-        aaah=true;
-        if (test)
-        {
-            Debug.Log(AllModules[Stats.atkSpeed]); 
-            selectedModule=AllModules[Stats.atkSpeed][0];
-            return;
-        }
-        selectedModule=AllModules[Stats.DamageMax][0];
-    }
-
-    public void RemoveModule()
-    {
-        AllModules[selectedModule.modifierType].Remove(selectedModule);
-        selectedModule=null;
-        UpdateModulesDisplay();
-    }
+    
 }

@@ -4,28 +4,27 @@ using UnityEngine;
 
 public class S_RessourceManager : MonoBehaviour
 {
-    private TextMeshProUGUI basicResourceDisplay;
-    private TextMeshProUGUI SpecialResourceDisplay;
+    [SerializeField] private TextMeshProUGUI basicResourceDisplay;
+    [SerializeField] TextMeshProUGUI SpecialResourceDisplay;
 
     // [HideInInspector]
     // public int basicResourceCount=0;
     // public int specialRessourceCount=0;
-    
 
+    [SerializeField] private int basicBeginningResources=0;
     public Dictionary<ResourceType, int> resourcesQuantity = new();
+    
     private void Start()
     {
-        basicResourceDisplay=transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        SpecialResourceDisplay=transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-        resourcesQuantity.Add(ResourceType.Base,0);
+        resourcesQuantity.Add(ResourceType.Base,basicBeginningResources);
         resourcesQuantity.Add(ResourceType.Special,0);
         UpdateResourceDisplay();
     }
 
     public void UpdateResourceDisplay()
     {
-        basicResourceDisplay.text = $"Basic\n{resourcesQuantity[ResourceType.Base]}";
-        SpecialResourceDisplay.text = $"Special\n{resourcesQuantity[ResourceType.Special]}";
+        basicResourceDisplay.text = resourcesQuantity[ResourceType.Base].ToString();
+        SpecialResourceDisplay.text = resourcesQuantity[ResourceType.Special].ToString();
     }
 
     public bool TryPayEnoughResources(ResourceType resource, int quantity)
@@ -34,9 +33,14 @@ public class S_RessourceManager : MonoBehaviour
         {
             return false;
         }
+
+        return true;
+    }
+
+    public void PayResources(ResourceType resource, int quantity)
+    {
         resourcesQuantity[resource] -= quantity;
         UpdateResourceDisplay();
-        return true;
     }
 
 }

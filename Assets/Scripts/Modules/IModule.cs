@@ -5,6 +5,6 @@ using UnityEngine;
 public interface IModule<T>
 {
     public T modifierType {get; set;}
-    public void ApplyModifier(S_TowerBase tower);
+    public Dictionary<Stats, float> ApplyModifier(Dictionary<Stats, float> statToChange);
 
 }

@@ -7,6 +7,7 @@ public class S_TowerSpawner : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField] private GameObject _towerPrefab;
     [SerializeField] private S_ModuleInventory moduleInventory;
+    internal S_TowerBase towerToApplyStat;
 
     private S_Pool<S_TowerBase> _towerPool;
 
@@ -19,7 +20,6 @@ public class S_TowerSpawner : MonoBehaviour
     {
         GameObject go = Instantiate(_towerPrefab, transform);
         S_TowerBase tower = go.GetComponent<S_TowerBase>();
-        tower.moduleInventory = moduleInventory;
         tower.Init();
         return tower;
     }
@@ -35,6 +35,7 @@ public class S_TowerSpawner : MonoBehaviour
     public S_TowerBase SpawnTower(SO_Towers stats)
     {
        S_TowerBase newTower= _towerPool.Get();
+       newTower.SetSO(stats);
         return newTower;
     }
 }

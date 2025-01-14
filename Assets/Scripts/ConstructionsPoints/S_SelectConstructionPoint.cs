@@ -6,18 +6,21 @@ using UnityEngine.EventSystems;
 
 public class S_SelectConstructionPoint : S_ClickableObject
 {
-    private List<BoxCollider2D> choiceButtons = new();
+    internal List<BoxCollider2D> choiceButtons = new();
     private Animator barAnimator;
-
+    internal GameObject slidingBar;
+    internal GameObject barMask;
     private void Start()
     {
         barAnimator = GetComponent<Animator>();
-        GameObject slidingBar = transform.GetChild(2).gameObject;
+        barMask = transform.GetChild(1).gameObject;
+        slidingBar = transform.GetChild(2).gameObject;
         for (int i = 1; i < slidingBar.transform.childCount; i++)
         {
             choiceButtons.Add(slidingBar.transform.GetChild(i).GetComponent<BoxCollider2D>());
             choiceButtons[i-1].enabled = false;
         }
+        
     }
 
     public override void Selected()

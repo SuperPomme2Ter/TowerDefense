@@ -10,7 +10,7 @@ public class SO_Towers : ScriptableObject
 
     [Header("value corresponding : \n[0]==Base\n[1]==Special")]
     public int[] costValue = new int[2];
-    public Dictionary<ResourceType, float> cost = new();
+    public Dictionary<ResourceType, int> cost = new();
 
     [Header("Corresponding to tower projectile behaviour")]
     public bool Hitscan;
@@ -19,12 +19,10 @@ public class SO_Towers : ScriptableObject
     public int archingPower;
     public float AOERange;
     public float velocity;
-    
 
-    [Header("Sprite")]
-    public Sprite baseSprite;
 
-    public GameObject canonCharacteristics;
+    [Header("Canon and Projectile")] 
+    public int canonChildIndex;
     public Sprite projectileSprite;
 
 

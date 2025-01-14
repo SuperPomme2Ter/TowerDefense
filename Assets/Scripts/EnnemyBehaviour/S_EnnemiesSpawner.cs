@@ -7,7 +7,6 @@ public class S_EnnemiesSpawner : MonoBehaviour
     [SerializeField] private GameObject _ennemyPrefab;
     [FormerlySerializedAs("ressourceCounter")] [SerializeField] private S_RessourceManager ressourceManager;
     public float pathHeight = 0.5f;
-    [SerializeField] private List<SO_Ennemy> _EnnemyType;
 
 
 
@@ -24,10 +23,10 @@ public class S_EnnemiesSpawner : MonoBehaviour
     {
         nodes = path;
     }
-    public void SpawnEnnemy(int index)
+    public void SpawnEnnemy(SO_Ennemy enemyStats)
     {
         S_EnnemyBase newEnnemy= _ennemyPool.Get();
-        newEnnemy.GetStats(nodes, _EnnemyType[index]);
+        newEnnemy.GetStats(nodes, enemyStats);
     }
 
     private S_EnnemyBase CreateEnnemy()

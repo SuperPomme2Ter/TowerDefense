@@ -10,6 +10,6 @@ public class SO_BasePassiveModifiers : ScriptableObject
     public int percentage;
     
     public int cost;
-    public Resources resourcesType;
+    public ResourceType resourcesType;
 
 }

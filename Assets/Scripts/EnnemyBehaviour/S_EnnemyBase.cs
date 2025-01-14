@@ -13,11 +13,11 @@ public class S_EnnemyBase : S_ClickableObject, IpoolInterface<S_EnnemyBase>
     Func<int> status;
     Vector3 ObjectivePos;
     S_EnnemyTravel pathToTravel;
-    Sprite ennemyRenderer;
+    [SerializeField] SpriteRenderer ennemyRenderer;
     public void Init(S_RessourceManager manager)
     {
         pathToTravel=gameObject.GetComponent<S_EnnemyTravel>();
-        ennemyRenderer=GetComponentInChildren<SpriteRenderer>().sprite;
+        ennemyRenderer=transform.GetChild(0).GetComponent<SpriteRenderer>();
         _ressourceManager = manager;
         pathToTravel.Init();
 
@@ -47,7 +47,7 @@ public class S_EnnemyBase : S_ClickableObject, IpoolInterface<S_EnnemyBase>
     {
         pv= _baseStats.pv;
         speed=_baseStats.Speed;
-        ennemyRenderer=_baseStats.sprite;
+        ennemyRenderer.color=_baseStats.Variant;
         ressourceGiven= _baseStats.ressourceGiven;
         List<Transform> nodesPos = new List<Transform>();
         nodesPos.Clear();

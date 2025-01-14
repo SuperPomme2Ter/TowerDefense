@@ -5,42 +5,48 @@ using UnityEngine;
 public class S_ModuleBase : IModule<Stats>
 {
     
-    public float percentage=0;
+    public int percentage=0;
     public Dictionary<ResourceType, int> cost = new();
-    private Action<S_TowerBase> ApplyStatFunction;
+    private Func<Dictionary<Stats, float>,Dictionary<Stats, float>> ApplyStatFunction;
     public Stats modifierType { get; set; }
 
-    internal S_ModuleBase(Stats modifier,float percentageToAdd)
+    internal S_ModuleBase(Stats modifier,int percentageToAdd, int moduleCost)
     {
-         percentage=percentageToAdd;
-         Debug.Log(percentage);
-         if (modifier == Stats.DamageMax)
-         {
-             ApplyStatFunction = ApplyDamageStat;
-             modifierType = Stats.DamageMax;
-             return;
-         }
+        cost.Add(ResourceType.Base,0);
+        cost.Add(ResourceType.Special,0); 
+        cost[ResourceType.Base]=moduleCost;
+        percentage=percentageToAdd;
+        Debug.Log(percentage);
 
-         ApplyStatFunction = ApplyStat;
+        if (modifier == Stats.DamageMax)
+        {
+            ApplyStatFunction = ApplyDamageStat;
+            modifierType = Stats.DamageMax;
+            return;
+        }
+
+        ApplyStatFunction = ApplyStat;
          modifierType=modifier;
     }
 
-    public void ApplyDamageStat(S_TowerBase tower)
+    private Dictionary<Stats, float> ApplyDamageStat(Dictionary<Stats, float> stats)
     {
-        tower.stats[Stats.DamageMin]+=MathMethods.CrossProduct(percentage,tower.stats[Stats.DamageMin]);
-        tower.stats[Stats.DamageMax]+=MathMethods.CrossProduct(percentage,tower.stats[Stats.DamageMax]);
-        Debug.Log(tower.stats[Stats.DamageMax]);
+        stats[Stats.DamageMin]+=MathMethods.CrossProduct(percentage,stats[Stats.DamageMin]);
+        stats[Stats.DamageMax]+=MathMethods.CrossProduct(percentage,stats[Stats.DamageMax]);
+        Debug.Log(stats[Stats.DamageMax]);
+        return stats;
     }
 
-    public void ApplyStat(S_TowerBase tower)
+    private Dictionary<Stats, float> ApplyStat(Dictionary<Stats, float> stats)
     {
-        tower.stats[modifierType] -=MathMethods.CrossProduct(percentage,tower.stats[modifierType]);
-        Debug.Log(tower.stats[Stats.atkSpeed]);
+        stats[modifierType] -=MathMethods.CrossProduct(percentage,stats[modifierType]);
+        Debug.Log(stats[modifierType]);
+        return stats;
     }
 
-    public void ApplyModifier(S_TowerBase tower)
+    public Dictionary<Stats, float> ApplyModifier(Dictionary<Stats, float> statToChange)
     {
-        ApplyStatFunction?.Invoke(tower);
+        return ApplyStatFunction?.Invoke(statToChange);
     }
     
 }

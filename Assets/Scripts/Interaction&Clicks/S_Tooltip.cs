@@ -1,16 +1,28 @@
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 
 public class S_Tooltip : MonoBehaviour
 {
-    [SerializeField] S_ModuleBase module;
+    [SerializeField] SO_BasePassiveModifiers moduleCharacteristics;
+    List<string> tooltipText=new List<string>();
+    
 
 
     private void Start()
     {
-        //GetComponentInChildren<TextMeshProUGUI>().text = "Cost : " +module.bonus.First().Value+" "+module.bonus.First().Key + "resources.";
+        string type = $"{moduleCharacteristics.statToChange}";
+        if (moduleCharacteristics.statToChange==Stats.DamageMax)
+        {
+            type = "Damage";
+        }
+        tooltipText.Add($"{type} module");
+        
+        GetComponentInChildren<TextMeshProUGUI>().text =
+            tooltipText[0];
     }
+
     public void ShowTooltip()
     {
 

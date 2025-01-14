@@ -13,7 +13,7 @@ public class SO_Ennemy : ScriptableObject
     public float Speed;
 
     [Header("Sprite")]
-    public Sprite sprite;
+    public Color Variant;
 
 
 }
