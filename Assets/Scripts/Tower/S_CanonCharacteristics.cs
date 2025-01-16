@@ -18,8 +18,8 @@ public class S_CanonCharacteristics : MonoBehaviour
      
      internal bool LaunchAnim(Vector3 position,int childIndex=0)
      {
-         transform.GetChild(0).GetChild(childIndex).GetComponent<Animator>().SetTrigger("Fire");
-         GetComponent<S_TowerCooldown>().enabled = false;
+         canon.GetComponent<Animator>().SetTrigger("Fire");
+         canon.transform.parent.parent.GetComponent<S_TowerCooldown>().enabled = false;
          return false;
      }
      internal bool AlignToFire(Vector3 target,int childIndex=0)

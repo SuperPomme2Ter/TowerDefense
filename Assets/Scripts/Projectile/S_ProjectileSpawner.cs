@@ -21,21 +21,16 @@ public class S_ProjectileSpawner : MonoBehaviour
     private void OnGetProjectile(S_ProjectileBase projectile)
     {
         projectile.gameObject.SetActive(true);
-        projectile.velocity = 0;
-        projectile.AOERange = 0;
-        projectile.damage = 0;
-        projectile.parentTower = null;
-        projectile.trajectory = null;
-        projectile.StopAllCoroutines();
+
+        //projectile.parentTower = null;
     }
     private void OnReleaseProjectile(S_ProjectileBase projectile)
     {
         projectile.gameObject.SetActive(false);
-        projectile.velocity = 0;
-        projectile.AOERange = 0;
         projectile.damage = 0;
-        projectile.parentTower = null;
-        projectile.trajectory = null;
+        projectile.originPos=Vector3.zero;
+        projectile.targetPos=Vector3.zero;
+        //projectile.parentTower = null;
         projectile.StopAllCoroutines();
     }
     public S_Pool<S_ProjectileBase> GetProjectilePool()

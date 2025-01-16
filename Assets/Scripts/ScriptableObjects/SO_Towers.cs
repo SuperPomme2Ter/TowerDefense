@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,10 +16,21 @@ public class SO_Towers : ScriptableObject
     [Header("Corresponding to tower projectile behaviour")]
     public bool Hitscan;
     public bool inflictStatus;
-    public bool arching;
     public int archingPower;
     public float AOERange;
     public float velocity;
+    
+    /// <summary>
+    /// 0 for Linear
+    /// 1 for Arching
+    /// </summary>
+    public int trajectoryFunctionIndex;
+    public Func<List<float>, List<Vector2>, ProjectileBehaviour> projectileCharacteristics;
+    private float[][] floatVariables;
+    [HideInInspector]
+    public float[] floatArgs;
+    
+
 
 
     [Header("Canon and Projectile")] 
@@ -39,6 +51,22 @@ public class SO_Towers : ScriptableObject
         cost.Clear();
         cost.Add(ResourceType.Base,costValue[0]);
         cost.Add(ResourceType.Special, costValue[1]);
+        floatVariables = new float[2][]
+        {
+            new float[1]
+            {
+                velocity
+            },
+            new float[3]
+            {
+                velocity,
+                archingPower,
+                AOERange
+            }
+        };
+        
+        projectileCharacteristics=S_BehaviorsFunction.projectileFunctions[trajectoryFunctionIndex];
+        floatArgs = floatVariables[trajectoryFunctionIndex];
 
     }
 #endif

@@ -30,7 +30,11 @@ public class S_TowerSpawner : MonoBehaviour
 
     private void OnReleaseTower(S_TowerBase tower)
     {
+        S_TowerBase towerScript = tower.GetComponent<S_TowerBase>();
+        towerScript.baseGameobject.transform.GetChild(towerScript.canonChildIndex).gameObject.SetActive(false);
         tower.gameObject.SetActive(false);
+
+
     }
     public S_TowerBase SpawnTower(SO_Towers stats)
     {

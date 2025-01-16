@@ -11,30 +11,30 @@ public class S_TowerBase : S_ClickableObject, IpoolInterface<S_TowerBase>
     Dictionary<ResourceType, int> cost = new Dictionary<ResourceType, int>();
 
     internal List<S_EnnemyBase> enemiesInRange= new();
+    
+    private Sprite projectileSprite;
 
     bool Hitscan = false;
-    bool AOE = false;
-    bool arching = false;
+    
+    float [] variablesArgs;
 
     internal S_ApplyModuleToTower moduleApplier;
     internal S_ModuleHUDInteraction moduleHUD;
 
-    [SerializeField] float AOERange;
-    [SerializeField] float velocity;
-
-    [SerializeField] SO_Towers towerCharacteristics;
+    //[SerializeField] SO_Towers towerCharacteristics;
     
-    private System.Func<Vector2, Vector2, float, Vector2> projectileTrajectory;
+    private ProjectileBehaviour projectileTrajectory;
 
     S_Pool<S_ProjectileBase> projectilePool;
 
     Action<S_EnnemyBase> statusToInflict;
 
     internal S_TowerCooldown cooldown;
-    
+
+    private Func<List<float>, List<Vector2>, ProjectileBehaviour> firingFunction;
     private System.Func<Vector3,int,bool> canonFiringFunction;
     private Transform canonFiringPosition;
-    private int canonChildIndex;
+    internal int canonChildIndex;
     
 
     [SerializeField] GameObject rangeCollider;
@@ -42,7 +42,7 @@ public class S_TowerBase : S_ClickableObject, IpoolInterface<S_TowerBase>
     S_Pool<S_TowerBase> pool;
     [SerializeField]
     float archingPower;
-    [SerializeField] GameObject baseGameobject;
+    [SerializeField] internal GameObject baseGameobject;
 
     private GameObject canon;
     ActiveModifiers[] installedActiveModules = new ActiveModifiers[4];
@@ -60,7 +60,7 @@ public class S_TowerBase : S_ClickableObject, IpoolInterface<S_TowerBase>
         moduleApplier = transform.parent.GetComponent<S_ApplyModuleToTower>();
         moduleHUD=moduleApplier.moduleHUD;
         cooldown.firing = Fire;
-        SetSO(towerCharacteristics);
+
 
 
 
@@ -70,6 +70,7 @@ public class S_TowerBase : S_ClickableObject, IpoolInterface<S_TowerBase>
         if (enemiesInRange.Count > 0)
         {
             enemiesInRange.OrderBy(x => x.GetTravelledDistance()).ToList();
+            
             TriggerProjectileBehaviour(enemiesInRange[0].transform.position);
             
             return true;
@@ -83,8 +84,9 @@ public class S_TowerBase : S_ClickableObject, IpoolInterface<S_TowerBase>
     }
     private void TriggerProjectileBehaviour( Vector2 endTravel)
     {
-
-        Vector3 fireDirection=projectileTrajectory.Invoke(transform.position,endTravel,1);
+        projectileTrajectory.constVectorVariables.Add(endTravel);
+        projectileTrajectory.constVectorVariables.Add(transform.position);
+        Vector3 fireDirection=transform.position+canonFiringPosition.position+(Vector3)projectileTrajectory.TrajectoryFunction(transform.position,endTravel,projectileTrajectory.constFloatVariables[0]);
         if (!canonFiringFunction.Invoke(fireDirection, canonChildIndex))
         {
             return;
@@ -97,40 +99,22 @@ public class S_TowerBase : S_ClickableObject, IpoolInterface<S_TowerBase>
     {
         S_ProjectileBase launchedProjectile = projectilePool.Get();
         launchedProjectile.damage = UnityEngine.Random.Range((int)stats[Stats.DamageMin],(int) stats[Stats.DamageMax]);
-        launchedProjectile.velocity = velocity;
-        launchedProjectile.parentTower = this;
-        launchedProjectile.sprite.sprite = towerCharacteristics.projectileSprite;
-        launchedProjectile.AOERange = AOERange;
+        launchedProjectile.behaviour=firingFunction(projectileTrajectory.constFloatVariables,projectileTrajectory.constVectorVariables);
+        //launchedProjectile.parentTower = this;
+        launchedProjectile.sprite.sprite = projectileSprite;
         launchedProjectile.statusFunction = statusToInflict;
-        launchedProjectile.trajectory = projectileTrajectory;
-        launchedProjectile.StopAllCoroutines();
-        launchedProjectile.StartCoroutine(launchedProjectile.Travel(canonFiringPosition.position,endTravel));
+        //launchedProjectile.StopAllCoroutines();
+        //launchedProjectile.StartCoroutine(launchedProjectile.Travel(canonFiringPosition.position,endTravel));
     }
     private void ActualizeCooldown()
     {
         cooldown.delay = stats[Stats.atkSpeed];
     }
-    private void SetProjectileStats()
-    {
-        if (arching)
-        {
-            projectileTrajectory = (originalPos, hit, timer) => Bezier(originalPos, (originalPos + hit) / 2 + new Vector2(0, archingPower), hit, timer);
-        }
-        else
-        {
-            projectileTrajectory = (originalPos,hit, timer) => Bezier(originalPos, hit, timer);
-        }
-        ActualizeCooldown();
-        
-    }
     public void SetSO(SO_Towers statsToGive)
     {
-        towerCharacteristics = statsToGive;
-        stats=towerCharacteristics.stats;
-        velocity= statsToGive.velocity;
-        AOERange=statsToGive.AOERange;
-        arching=statsToGive.arching;
-        archingPower = statsToGive.archingPower;
+        stats=statsToGive.stats;
+        projectileTrajectory = statsToGive.projectileCharacteristics(new List<float>(statsToGive.floatArgs.ToList()),new List<Vector2>(0));
+        projectileSprite = statsToGive.projectileSprite;
         canon=transform.GetChild(statsToGive.canonChildIndex).gameObject;
         canon.SetActive(true);
         rangeCollider.GetComponent<CircleCollider2D>().radius = stats[Stats.Range];
@@ -140,8 +124,7 @@ public class S_TowerBase : S_ClickableObject, IpoolInterface<S_TowerBase>
         canonScript.gameObject.SetActive(true);
         canonFiringFunction=canonScript.FiringFunctions[canonChildIndex];
         canonFiringPosition= canonScript.offsetFiringPosition;
-        SetProjectileStats();
-
+        projectileTrajectory = statsToGive.projectileCharacteristics(new List<float>(statsToGive.floatArgs.ToList()),new List<Vector2>(0));
     }
 
     public void SetPool(S_Pool<S_TowerBase> _pool)

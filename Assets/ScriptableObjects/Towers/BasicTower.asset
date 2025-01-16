@@ -15,7 +15,7 @@ MonoBehaviour:
   statValue:
   - 4
   - 6
-  - 3
+  - 3.5
   - 0.3
   costValue: 0a00000000000000
   Hitscan: 0
@@ -24,6 +24,5 @@ MonoBehaviour:
   archingPower: 0
   AOERange: 0.01
   velocity: 4
-  baseSprite: {fileID: 21300000, guid: 74f90b2f5f5e4e945843a63aeb01b252, type: 3}
-  canonCharacteristics: {fileID: 6065912495640578454, guid: a057de81f2310a644b17f977e66ca0ad, type: 3}
+  canonChildIndex: 0
   projectileSprite: {fileID: 21300000, guid: 47840c8ea0b1dc54683c4e42f0bfb187, type: 3}

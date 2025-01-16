@@ -8,13 +8,16 @@ public class S_ProjectileBase : MonoBehaviour, IpoolInterface<S_ProjectileBase>
 {
     
     public Action<S_EnnemyBase> statusFunction;
-    public System.Func< Vector2,Vector2,float,Vector2> trajectory;
     public float AOERange;
     public int damage;
     public float velocity;
     public SpriteRenderer sprite;
     S_Pool<S_ProjectileBase> pool;
-    public S_TowerBase parentTower;
+    internal Vector3 originPos;
+    internal Vector3 targetPos;
+    private float timer = 0;
+    internal ProjectileBehaviour behaviour;
+    //public S_TowerBase parentTower;
 
     internal void Init()
     {
@@ -29,35 +32,70 @@ public class S_ProjectileBase : MonoBehaviour, IpoolInterface<S_ProjectileBase>
         }
         pool.Release(this);
     }
-
-    public IEnumerator Travel(Vector2 trajectoryBeginning , Vector2 hit)
+    private void Update()
     {
-        Vector2 originalPos= trajectoryBeginning;
-        float timer = 0;
-        while (true)
+        transform.position=behaviour.TrajectoryFunction.Invoke(originPos, targetPos, timer);
+        transform.right = (Vector3) behaviour.TrajectoryFunction.Invoke(originPos, targetPos, timer) - transform.position; //Evil LookAt2D
+        timer += Time.deltaTime*behaviour.constFloatVariables[0];
+        if(behaviour.VerifyEndTrajectory.Invoke(transform.position,timer))
         {
-            
-            transform.position = trajectory.Invoke(originalPos,hit, timer);
-            transform.right = (Vector3) trajectory.Invoke(originalPos, hit, timer+Time.deltaTime) - transform.position; //Evil LookAt2D
-
-            timer += Time.deltaTime*velocity;
-            yield return new WaitForEndOfFrame();
-            if(timer > 0.98f)
+            transform.position=targetPos;
+            List<Collider2D> colliders = behaviour.EnemiesDetectionFunction.Invoke();
+            List<S_EnnemyBase> enemiesInDamage = new();
+            if (colliders.Count > 0)
             {
-                transform.position=hit;
-                break;
+                colliders.ForEach(collider =>enemiesInDamage.Add( collider.GetComponent<S_EnnemyBase>()));
+
+                DamageEnnemies(enemiesInDamage);
             }
-
+            else
+            {
+                pool.Release(this);
+            }
         }
-        List<Collider2D> colliders = Physics2D.OverlapCircleAll(hit, AOERange, (1<<8)).ToList();
-        List<S_EnnemyBase> enemiesInDamage = new();
-
-        colliders.ForEach(collider =>enemiesInDamage.Add( collider.GetComponent<S_EnnemyBase>()));
-
-        DamageEnnemies(enemiesInDamage);
-        timer = 0;
-        yield return null;
     }
+
+    // public void Travel(Vector2 trajectoryBeginning , Vector2 hit)
+    // {
+    //     Vector2 originalPos= trajectoryBeginning;
+    //     while (true)
+    //     {
+    //         
+    //         transform.position = trajectory.Invoke(originalPos,hit, timer);
+    //         transform.right = (Vector3) trajectory.Invoke(originalPos, hit, timer+Time.deltaTime) - transform.position; //Evil LookAt2D
+    //
+    //         timer += Time.deltaTime*velocity;
+    //         if(timer > 0.98f)
+    //         {
+    //             transform.position=hit;
+    //             break;
+    //         }
+    //
+    //     }
+    //
+    //     List<Collider2D> colliders=new List<Collider2D>();
+    //     if (AOE)
+    //     {
+    //         colliders = Physics2D.OverlapCircleAll(hit, AOERange, (1<<8)).ToList();
+    //     }
+    //     else
+    //     {
+    //         colliders.Clear();
+    //         colliders.Add(Physics2D.OverlapCircle(hit, AOERange, (1<<8)));
+    //     }
+    //     
+    //     List<S_EnnemyBase> enemiesInDamage = new();
+    //     if (colliders.Count > 0)
+    //     {
+    //         colliders.ForEach(collider =>enemiesInDamage.Add( collider.GetComponent<S_EnnemyBase>()));
+    //
+    //         DamageEnnemies(enemiesInDamage);
+    //     }
+    //     else
+    //     {
+    //         pool.Release(this);
+    //     }
+    // }
 
     public void SetPool(S_Pool<S_ProjectileBase> _pool)
     {
